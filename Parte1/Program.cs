@@ -2,21 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using System.Text.Json; 
+using System.Text.Json;
 
 namespace Parte1
 {
     public class TransicaoJson
     {
         public string origem { get; set; }
-        public string simbolo { get; set; } 
+        public string simbolo { get; set; }
         public string destino { get; set; }
     }
 
     public class AfdJson
     {
         public List<string> estados { get; set; }
-        public List<string> alfabeto { get; set; } 
+        public List<string> alfabeto { get; set; }
         public string estadoInicial { get; set; }
         public List<string> estadosAceitacao { get; set; }
         public List<TransicaoJson> transicoes { get; set; }
@@ -39,28 +39,28 @@ namespace Parte1
             F = f;
         }
 
-        public bool Aceitar(string cadeia, out List<string> rastro)
+        public bool Analisar(string palavra, out List<string> caminho)
         {
-            rastro = new List<string>();
-            string estadoAtual = q0;
-            rastro.Add(estadoAtual);
+            caminho = new List<string>();
+            string estadoAgora = q0;
+            caminho.Add(estadoAgora);
 
-            if (cadeia == "E" || string.IsNullOrEmpty(cadeia))
+            if (palavra == "E" || string.IsNullOrEmpty(palavra))
             {
-                return F.Contains(estadoAtual);
+                return F.Contains(estadoAgora);
             }
 
-            foreach (char simbolo in cadeia)
+            foreach (char letra in palavra)
             {
-                if (!Sigma.Contains(simbolo))
+                if (!Sigma.Contains(letra))
                 {
                     return false;
                 }
 
-                if (Delta.TryGetValue((estadoAtual, simbolo), out string proximoEstado))
+                if (Delta.TryGetValue((estadoAgora, letra), out string proximo))
                 {
-                    estadoAtual = proximoEstado;
-                    rastro.Add(estadoAtual);
+                    estadoAgora = proximo;
+                    caminho.Add(estadoAgora);
                 }
                 else
                 {
@@ -68,7 +68,7 @@ namespace Parte1
                 }
             }
 
-            return F.Contains(estadoAtual);
+            return F.Contains(estadoAgora);
         }
 
         public void ExibirDiagrama()
@@ -77,37 +77,37 @@ namespace Parte1
             Console.WriteLine($"{"Estado",-10} | " + string.Join(" | ", Sigma.Select(s => s.ToString().PadRight(8))));
             Console.WriteLine(new string('-', 12 + Sigma.Count * 11));
 
-            foreach (var estado in Q)
+            foreach (var est in Q)
             {
-                string linha = $"{estado,-10} | ";
-                foreach (var simbolo in Sigma)
+                string linhaTabela = $"{est,-10} | ";
+                foreach (var simb in Sigma)
                 {
-                    if (Delta.TryGetValue((estado, simbolo), out string destino))
-                        linha += $"{destino,-8} | ";
+                    if (Delta.TryGetValue((est, simb), out string dest))
+                        linhaTabela += $"{dest,-8} | ";
                     else
-                        linha += $"{"-",-8} | ";
+                        linhaTabela += $"{"-",-8} | ";
                 }
-                Console.WriteLine(linha);
+                Console.WriteLine(linhaTabela);
             }
             Console.WriteLine("---------------------------------------\n");
         }
 
-        public static AFD CarregarDeJson(string caminhoArquivo)
+        public static AFD CarregarDeJson(string caminho)
         {
-            string jsonString = File.ReadAllText(caminhoArquivo);
-            AfdJson config = JsonSerializer.Deserialize<AfdJson>(jsonString);
+            string textoJson = File.ReadAllText(caminho);
+            AfdJson dadosJson = JsonSerializer.Deserialize<AfdJson>(textoJson);
 
-            var Q = new HashSet<string>(config.estados);
-            var Sigma = new HashSet<char>(config.alfabeto.Select(a => a[0]));
-            var F = new HashSet<string>(config.estadosAceitacao);
+            var Q = new HashSet<string>(dadosJson.estados);
+            var Sigma = new HashSet<char>(dadosJson.alfabeto.Select(a => a[0]));
+            var F = new HashSet<string>(dadosJson.estadosAceitacao);
             var Delta = new Dictionary<(string, char), string>();
 
-            foreach (var t in config.transicoes)
+            foreach (var transicao in dadosJson.transicoes)
             {
-                Delta[(t.origem, t.simbolo[0])] = t.destino;
+                Delta[(transicao.origem, transicao.simbolo[0])] = transicao.destino;
             }
 
-            return new AFD(Q, Sigma, Delta, config.estadoInicial, F);
+            return new AFD(Q, Sigma, Delta, dadosJson.estadoInicial, F);
         }
     }
 
@@ -129,40 +129,40 @@ namespace Parte1
                 { ("q2", 'a'), "q1" }, { ("q2", 'b'), "q0" }
             };
 
-            AFD afdL1 = new AFD(Q, Sigma, Delta, q0, F);
+            AFD maquina1 = new AFD(Q, Sigma, Delta, q0, F);
 
-            afdL1.ExibirDiagrama();
+            maquina1.ExibirDiagrama();
 
-            CriarArquivoDeEntrada(); 
+            GerarArquivosTxt();
 
             Console.WriteLine("Processando entradas.txt para L1...\n");
-            string[] cadeias = File.ReadAllLines("entradas.txt");
+            string[] linhasTxt = File.ReadAllLines("entradas.txt");
 
-            foreach (var cadeia in cadeias)
+            foreach (var linha in linhasTxt)
             {
-                if (string.IsNullOrWhiteSpace(cadeia)) continue;
+                if (string.IsNullOrWhiteSpace(linha)) continue;
 
-                string cadeiaFormatada = cadeia.Trim();
-                bool aceito = afdL1.Aceitar(cadeiaFormatada, out List<string> rastro);
+                string textoLimpo = linha.Trim();
+                bool passou = maquina1.Analisar(textoLimpo, out List<string> caminhoFeito);
 
-                string resultado = aceito ? "ACEITA" : "REJEITA";
-                string rastroStr = string.Join(" -> ", rastro);
+                string resultado = passou ? "ACEITA" : "REJEITA";
+                string caminhoStr = string.Join(" -> ", caminhoFeito);
 
-                Console.WriteLine($"Cadeia: {(cadeiaFormatada == "E" ? "vazia" : cadeiaFormatada)}");
-                Console.WriteLine($"Rastro: {rastroStr}");
+                Console.WriteLine($"Cadeia: {(textoLimpo == "E" ? "vazia" : textoLimpo)}");
+                Console.WriteLine($"Rastro: {caminhoStr}");
                 Console.WriteLine($"Resultado: {resultado}");
                 Console.WriteLine(new string('-', 30));
             }
 
             Console.WriteLine("\nCarregando afd.json");
-            CriarArquivoJson();
+            GerarArquivoJson();
 
-            AFD afdDinamico = AFD.CarregarDeJson("afd.json");
+            AFD maquinaDinamica = AFD.CarregarDeJson("afd.json");
             Console.WriteLine("Máquina carregada com sucesso do arquivo JSON!");
-            afdDinamico.ExibirDiagrama();
+            maquinaDinamica.ExibirDiagrama();
         }
 
-        static void CriarArquivoDeEntrada()
+        static void CriaTxt()
         {
             if (!File.Exists("entradas.txt"))
             {
@@ -172,11 +172,11 @@ namespace Parte1
             }
         }
 
-        static void CriarArquivoJson()
+        static void CriaJson()
         {
             if (!File.Exists("afd.json"))
             {
-                string jsonExemplo = @"{
+                string conteudoJson = @"{
                   ""estados"": [""q0"", ""q1""],
                   ""alfabeto"": [""0"", ""1""],
                   ""estadoInicial"": ""q0"",
@@ -188,7 +188,7 @@ namespace Parte1
                     { ""origem"": ""q1"", ""simbolo"": ""0"", ""destino"": ""q1"" }
                   ]
                 }";
-                File.WriteAllText("afd.json", jsonExemplo);
+                File.WriteAllText("afd.json", conteudoJson);
             }
         }
     }
