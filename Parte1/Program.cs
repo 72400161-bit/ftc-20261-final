@@ -133,7 +133,7 @@ namespace Parte1
 
             maquina1.ExibirDiagrama();
 
-            GerarArquivosTxt();
+            CriaTxt();
 
             Console.WriteLine("Processando entradas.txt para L1...\n");
             string[] linhasTxt = File.ReadAllLines("entradas.txt");
@@ -155,7 +155,7 @@ namespace Parte1
             }
 
             Console.WriteLine("\nCarregando afd.json");
-            GerarArquivoJson();
+            CriaJson();
 
             AFD maquinaDinamica = AFD.CarregarDeJson("afd.json");
             Console.WriteLine("Máquina carregada com sucesso do arquivo JSON!");
