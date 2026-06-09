@@ -7,7 +7,7 @@
 
 
 ## Equipe
-* **Alex Paulo Vianna Da Costa Candido e Silva** - Matrícula:72400161
+* **Alex Paulo Vianna Da Costa Candido e Silva** - Matrícula: 72400161
 * **Carlos Henrique Queiroz Teixeira Ramos** - Matrícula: 
 * **Bernardo Medeiros Mendes** - Matrícula: 
 
@@ -22,7 +22,7 @@ O projeto foi desenvolvido em .NET (C#). Para executar qualquer um dos simulador
 
 Navegue até a pasta da máquina desejada via terminal e execute o comando genérico de inicialização:
 
-cd Parte1
+cd Parte1 -->
 dotnet run
 
 
