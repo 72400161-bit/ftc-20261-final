@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable disable
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -30,42 +31,42 @@ namespace Parte3
 
         public bool Analisar(string palavra)
         {
-            var minhaFita = new Dictionary<int, char>();
+            var fita = new Dictionary<int, char>();
 
             for (int i = 0; i < palavra.Length; i++)
             {
-                minhaFita[i] = palavra[i];
+                fita[i] = palavra[i];
             }
 
             if (palavra.Length == 0 || palavra == "E")
             {
-                minhaFita[0] = B;
+                fita[0] = B;
             }
 
-            int ponteiro = 0;
-            string estadoAgora = q0;
+            int cabecote = 0;
+            string estadoAtual = q0;
 
             while (true)
             {
-                if (!minhaFita.ContainsKey(ponteiro))
+                if (!fita.ContainsKey(cabecote))
                 {
-                    minhaFita[ponteiro] = B;
+                    fita[cabecote] = B;
                 }
 
-                char letraLida = minhaFita[ponteiro];
+                char simboloLido = fita[cabecote];
 
-                MostrarFita(minhaFita, ponteiro, estadoAgora);
+                MostrarFita(fita, cabecote, estadoAtual);
 
-                if (F.Contains(estadoAgora))
+                if (F.Contains(estadoAtual))
                 {
                     return true;
                 }
 
-                if (Delta.TryGetValue((estadoAgora, letraLida), out var regra))
+                if (Delta.TryGetValue((estadoAtual, simboloLido), out var acao))
                 {
-                    minhaFita[ponteiro] = regra.simboloEscrito;
-                    estadoAgora = regra.novoEstado;
-                    ponteiro += (regra.direcao == 'R') ? 1 : -1;
+                    fita[cabecote] = acao.simboloEscrito;
+                    estadoAtual = acao.novoEstado;
+                    cabecote += (acao.direcao == 'R') ? 1 : -1;
                 }
                 else
                 {
@@ -74,27 +75,27 @@ namespace Parte3
             }
         }
 
-        private void MostrarFita(Dictionary<int, char> fita, int ponteiro, string estado)
+        private void MostrarFita(Dictionary<int, char> fita, int posicaoAtual, string estado)
         {
-            int menorId = fita.Keys.Count > 0 ? Math.Min(fita.Keys.Min(), ponteiro - 1) : ponteiro - 1;
-            int maiorId = fita.Keys.Count > 0 ? Math.Max(fita.Keys.Max(), ponteiro + 1) : ponteiro + 1;
+            int minId = fita.Keys.Count > 0 ? Math.Min(fita.Keys.Min(), posicaoAtual - 1) : posicaoAtual - 1;
+            int maxId = fita.Keys.Count > 0 ? Math.Max(fita.Keys.Max(), posicaoAtual + 1) : posicaoAtual + 1;
 
-            string visual = "";
+            string printFita = "";
 
-            for (int i = menorId; i <= maiorId; i++)
+            for (int i = minId; i <= maxId; i++)
             {
-                char letra = fita.ContainsKey(i) ? fita[i] : B;
+                char simb = fita.ContainsKey(i) ? fita[i] : B;
 
-                if (i == ponteiro)
+                if (i == posicaoAtual)
                 {
-                    visual += $" [{estado}>{letra}] ";
+                    printFita += $" [{estado}>{simb}] ";
                 }
                 else
                 {
-                    visual += $" {letra} ";
+                    printFita += $" {simb} ";
                 }
             }
-            Console.WriteLine($"Fita: ...{visual}...");
+            Console.WriteLine($"Fita: ...{printFita}...");
         }
     }
 
@@ -102,11 +103,11 @@ namespace Parte3
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Máquina de Turing\n");
-            GerarArquivosTxt();
+            Console.WriteLine("MÃ¡quina de Turing (Parte 3)\n");
+            CriarTxt();
 
             TestarL4();
-            TestarSoma();
+            TestarAdicao();
         }
 
         static void TestarL4()
@@ -138,25 +139,25 @@ namespace Parte3
                 { ("q4", '_'), ("q_acc", '_', 'R') }
             };
 
-            var maquinaL4 = new MaquinaTuring(Q, Sigma, Gamma, Delta, "q0", B, new HashSet<string> { "q_acc" });
+            var mt = new MaquinaTuring(Q, Sigma, Gamma, Delta, "q0", B, new HashSet<string> { "q_acc" });
 
-            string[] linhasTxt = File.ReadAllLines("entradas_mt.txt");
+            string[] listaTextos = File.ReadAllLines("entradas_mt.txt");
 
-            foreach (var linha in linhasTxt)
+            foreach (var linha in listaTextos)
             {
-                string textoLimpo = linha.Trim() == "E" ? "" : linha.Trim();
-                Console.WriteLine($"\nProcessando L4: {(textoLimpo == "" ? "vazia" : textoLimpo)}");
+                string limpa = linha.Trim() == "E" ? "" : linha.Trim();
+                Console.WriteLine($"\nProcessando L4: {(limpa == "" ? "vazia" : limpa)}");
 
-                bool passou = maquinaL4.Analisar(textoLimpo);
+                bool deucerto = mt.Analisar(limpa);
 
-                Console.WriteLine($"Resultado: {(passou ? "ACEITA" : "REJEITA")}");
+                Console.WriteLine($"Resultado: {(deucerto ? "ACEITA" : "REJEITA")}");
                 Console.WriteLine(new string('-', 50));
             }
         }
 
-        static void TestarSoma()
+        static void TestarAdicao()
         {
-            Console.WriteLine("\fazendo f(n) = n + 1 adicao unaria");
+            Console.WriteLine("\nFazendo f(n) = n + 1 adicao unaria");
 
             var Q = new HashSet<string> { "q0", "q_acc" };
             var Sigma = new HashSet<char> { '1' };
@@ -169,20 +170,20 @@ namespace Parte3
                 { ("q0", '_'), ("q_acc", '1', 'R') }
             };
 
-            var maquinaSoma = new MaquinaTuring(Q, Sigma, Gamma, Delta, "q0", B, new HashSet<string> { "q_acc" });
+            var mtSoma = new MaquinaTuring(Q, Sigma, Gamma, Delta, "q0", B, new HashSet<string> { "q_acc" });
 
-            string[] valores = { "1", "11", "1111" };
+            string[] listaValores = { "1", "11", "1111" };
 
-            foreach (var val in valores)
+            foreach (var v in listaValores)
             {
-                Console.WriteLine($"\nprocessando f(n) para n = {val.Length} (cadeia: {val})");
-                maquinaSoma.Analisar(val);
+                Console.WriteLine($"\nprocessando f(n) para n = {v.Length} (cadeia: {v})");
+                mtSoma.Analisar(v);
                 Console.WriteLine($"resultado funcionou");
                 Console.WriteLine(new string('-', 50));
             }
         }
 
-        static void GerarArquivosTxt()
+        static void CriarTxt()
         {
             if (!File.Exists("entradas_mt.txt"))
             {
