@@ -26,4 +26,4 @@ cd Parte1 -->
 dotnet run
 
 
-#Link do vídeo do Youtube : 
+#Link do vídeo do Youtube : https://youtu.be/NlR8MgBZhgQ?si=zBbeEu3JSTyg8biC
