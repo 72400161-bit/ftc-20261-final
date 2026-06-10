@@ -8,8 +8,8 @@
 
 ## Equipe
 * **Alex Paulo Vianna Da Costa Candido e Silva** - Matrícula: 72400161
-* **Carlos Henrique Queiroz Teixeira Ramos** - Matrícula: 
-* **Bernardo Medeiros Mendes** - Matrícula: 
+* **Carlos Henrique Queiroz Teixeira Ramos** - Matrícula: 72401001
+* **Bernardo Medeiros Mendes** - Matrícula: 72400269
 
 ## Descrição do Projeto
 Este repositório contém a implementação de três simuladores de máquinas abstratas, desenvolvidos como requisito final para a disciplina de Fundamentos Teóricos da Computação.
